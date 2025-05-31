@@ -47,20 +47,10 @@ MAX_M=5000
 MAX_N=3
 
 # Create TPE tokenizer
-python create_tpe_tokenizer.py \
-    --data_format $DATA_FORMAT \
-    --task $TASK \
-    --model_path $MODEL_PATH \
-    --max_m $MAX_M \
-    --max_n $MAX_N
+python create_tpe_tokenizer.py --data_format $DATA_FORMAT --task $TASK --model_path $MODEL_PATH --max_m $MAX_M --max_n $MAX_N
 
 # Fit TPE tokenizer
-python llm_fit_tpe_tokenizer.py \
-    --data_format $DATA_FORMAT \
-    --task $TASK \
-    --model_path $MODEL_PATH \
-    --max_m $MAX_M \
-    --max_n $MAX_N
+python llm_fit_tpe_tokenizer.py --data_format $DATA_FORMAT --task $TASK --model_path $MODEL_PATH --max_m $MAX_M --max_n $MAX_N
 ```
 
 **Shortcut**: We provide a shell script that automates both steps above. Simply run:
@@ -77,17 +67,12 @@ Once you have your MedTPE‐augmented LLM in data/tpe_models/, perform self‐su
 # Set your variables (adjust paths as needed):
 DATA_FORMAT="nl"
 TASK="icu_mortality"
-TPE_MODEL_PATH=""data/tpe_models/Qwen2.5-1.5B-Instruct_task-icu_mortality_maxN-3_maxM-5000""
+TPE_MODEL_PATH="data/tpe_models/Qwen2.5-1.5B-Instruct_task-icu_mortality_maxN-3_maxM-5000"
 DATA_DIR="data/cleaned_SFT_QA"
 TRAIN_FN="sft"
 
 # Launch SFT
-python llm_sft.py \
-        --model_path "$TPE_MODEL_PATH" \
-        --task "$TASK" \
-        --data_dir "$DATA_DIR" \
-        --data_format "$DATA_FORMAT" \
-        --train_fn "$TRAIN_FN" 
+python llm_sft.py --model_path "$TPE_MODEL_PATH" --task "$TASK" --data_dir "$DATA_DIR" --data_format "$DATA_FORMAT" --train_fn "$TRAIN_FN" 
 ```
 
 **Shortcut**: Running the shell script
@@ -99,7 +84,5 @@ After training completes, you’ll find the fine‐tuned checkpoint(s) in *data/
 ### 6. Run inference demo with VLLM.
 With your MedTPE + SFT model ready, you can test it against an example prompt via VLLM. For instance:
 ```bash
-python demo_inference.py \
-    --model_name <original LLM path> \
-    --sft_model_name <MedTPE LLM path>
+python demo_inference.py --model_name <original LLM path> --sft_model_name <MedTPE LLM path>
 ```
