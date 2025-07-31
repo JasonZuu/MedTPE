@@ -1,0 +1,9 @@
+data
+wandb
+log/*
+__pycache__
+*.pyc
+hf_cache
+.vscode
+best_model_checkpoint
+*.pdf
