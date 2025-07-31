@@ -95,7 +95,7 @@ Follow these structured steps to reproduce the experimental results described in
 This experiment assesses the capability of LLM with MedTPE. We also include the LLMLingua2 as the baseline.
 
 Run:
-```
+```bash
 sh llm_infer_exp1_tpe.sh  # Approximate runtime: 20 hours (GPU-dependent)
 sh parse_result_llm_exp1_tpe.sh
 ```
@@ -105,7 +105,7 @@ sh parse_result_llm_exp1_tpe.sh
 This evaluation measures the computational overhead introduced by MedTPE integration.
 
 Run:
-```
+```bash
 sh exp2_cost.sh
 ```
 ### RQ3: Evaluate Context-length Robustness
@@ -113,7 +113,7 @@ sh exp2_cost.sh
 Assess how robust MedTPE-enhanced models are to variations in input context length.
 
 Run:
-```
+```bash
 sh llm_infer_exp3_context_len.sh  # Approximate runtime: 20-40 hours (GPU-dependent)
 sh parse_result_llm_exp3_context_len.sh
 ```
@@ -122,7 +122,7 @@ sh parse_result_llm_exp3_context_len.sh
 Evaluate the MedTPE's potential with test-time scaling strategy. In our study, we use the majority voting as the test-time scaling method.
 
 Run:
-```
+```bash
 sh llm_infer_exp4_tts.sh  # Approximate runtime: 20-40 hours (GPU-dependent)
 sh parse_result_llm_exp4_tts.sh
 ```
