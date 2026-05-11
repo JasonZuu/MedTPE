@@ -1,0 +1,4 @@
+data_prefix: "## Data\n"
+instruction: |-
+  ## Instructions
+  Summarize the following transcript in free text without any JSON formatting requirements.
