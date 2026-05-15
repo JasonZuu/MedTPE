@@ -19,7 +19,7 @@ This project needs the following prerequisites:
 
 ### Installation
 ```bash
-git clone <repo>
+git clone https://github.com/JasonZuu/MedTPE.git
 cd MedTPE
 pip install -r requirements.txt
 ```
