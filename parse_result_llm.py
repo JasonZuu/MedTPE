@@ -3,8 +3,6 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import json
-import math
-from collections import Counter
 
 
 def get_args():
@@ -97,42 +95,10 @@ def compute_rouge_scores(preds, refs):
 
 
 def compute_bertscore(preds, refs):
-    p_tensor, r_tensor, f1_tensor = bertscore_score(preds, refs, lang="en")
-    precision = float(p_tensor.mean().item())
-    recall = float(r_tensor.mean().item())
-    f1 = float(f1_tensor.mean().item())
+    _, _, f1_tensor = bertscore_score(preds, refs, lang="en")
     return {
-        "precision": precision,
-        "recall": recall,
-        "f1": f1,
+        "f1": float(f1_tensor.mean().item()),
     }
-
-
-def _get_ngrams(tokens, n):
-    if len(tokens) < n:
-        return Counter()
-    return Counter(tuple(tokens[i : i + n]) for i in range(len(tokens) - n + 1))
-
-
-def compute_bleu_score(pred: str, ref: str, max_n: int = 4, smooth: float = 1.0) -> float:
-    pred_tokens = pred.lower().split()
-    ref_tokens = ref.lower().split()
-    pred_len = len(pred_tokens)
-    ref_len = len(ref_tokens)
-    if pred_len == 0 or ref_len == 0:
-        return 0.0
-    log_precisions = []
-    for n in range(1, max_n + 1):
-        pred_ngrams = _get_ngrams(pred_tokens, n)
-        ref_ngrams = _get_ngrams(ref_tokens, n)
-        overlap = sum((pred_ngrams & ref_ngrams).values())
-        total = sum(pred_ngrams.values())
-        precision_n = (overlap + smooth) / (total + smooth) if total > 0 else 0.0
-        if precision_n == 0.0:
-            return 0.0
-        log_precisions.append(math.log(precision_n))
-    brevity_penalty = 1.0 if pred_len > ref_len else math.exp(1.0 - (ref_len / pred_len))
-    return float(brevity_penalty * math.exp(sum(log_precisions) / max_n))
 
 
 def evaluate_ectsum_summaries(result_path: str, n_bootstrap: int, seed: int):
@@ -152,9 +118,6 @@ def evaluate_ectsum_summaries(result_path: str, n_bootstrap: int, seed: int):
             "rouge1": 0.0,
             "rouge2": 0.0,
             "rougeL": 0.0,
-            "bleu": 0.0,
-            "bertscore_precision": 0.0,
-            "bertscore_recall": 0.0,
             "bertscore_f1": 0.0,
         }
         total_samples = len(preds)
@@ -176,30 +139,23 @@ def evaluate_ectsum_summaries(result_path: str, n_bootstrap: int, seed: int):
     rouge1_scores = []
     rouge2_scores = []
     rougeL_scores = []
-    bleu_scores = []
     for pred, ref in zip(filtered_preds, filtered_refs):
         scores = scorer.score(ref, pred)
         rouge1_scores.append(scores["rouge1"].fmeasure)
         rouge2_scores.append(scores["rouge2"].fmeasure)
         rougeL_scores.append(scores["rougeL"].fmeasure)
-        bleu_scores.append(compute_bleu_score(pred=pred, ref=ref))
     rouge1_scores = np.array(rouge1_scores, dtype=float)
     rouge2_scores = np.array(rouge2_scores, dtype=float)
     rougeL_scores = np.array(rougeL_scores, dtype=float)
-    bleu_scores = np.array(bleu_scores, dtype=float)
     rouge_stats = {
         "rouge1": float(rouge1_scores.mean()),
         "rouge2": float(rouge2_scores.mean()),
         "rougeL": float(rougeL_scores.mean()),
         "valid_count": len(filtered_preds),
     }
-    p_tensor, r_tensor, f1_tensor = bertscore_score(filtered_preds, filtered_refs, lang="en")
-    p_scores = p_tensor.cpu().numpy().astype(float)
-    r_scores = r_tensor.cpu().numpy().astype(float)
+    _, _, f1_tensor = bertscore_score(filtered_preds, filtered_refs, lang="en")
     f1_scores = f1_tensor.cpu().numpy().astype(float)
     bert_stats = {
-        "precision": float(p_scores.mean()),
-        "recall": float(r_scores.mean()),
         "f1": float(f1_scores.mean()),
     }
     total_samples = len(preds)
@@ -210,9 +166,6 @@ def evaluate_ectsum_summaries(result_path: str, n_bootstrap: int, seed: int):
         "rouge1": rouge_stats["rouge1"],
         "rouge2": rouge_stats["rouge2"],
         "rougeL": rouge_stats["rougeL"],
-        "bleu": float(bleu_scores.mean()),
-        "bertscore_precision": bert_stats["precision"],
-        "bertscore_recall": bert_stats["recall"],
         "bertscore_f1": bert_stats["f1"],
     }
     bootstrap_metrics = {}
@@ -222,18 +175,12 @@ def evaluate_ectsum_summaries(result_path: str, n_bootstrap: int, seed: int):
         rouge1_sample_means = []
         rouge2_sample_means = []
         rougeL_sample_means = []
-        bleu_sample_means = []
-        bert_p_sample_means = []
-        bert_r_sample_means = []
         bert_f1_sample_means = []
         for _ in range(n_bootstrap):
             sample_idx = rng.choice(indices, size=valid_samples, replace=True)
             rouge1_sample_means.append(float(rouge1_scores[sample_idx].mean()))
             rouge2_sample_means.append(float(rouge2_scores[sample_idx].mean()))
             rougeL_sample_means.append(float(rougeL_scores[sample_idx].mean()))
-            bleu_sample_means.append(float(bleu_scores[sample_idx].mean()))
-            bert_p_sample_means.append(float(p_scores[sample_idx].mean()))
-            bert_r_sample_means.append(float(r_scores[sample_idx].mean()))
             bert_f1_sample_means.append(float(f1_scores[sample_idx].mean()))
         bootstrap_metrics = {
             "rouge1": {
@@ -247,18 +194,6 @@ def evaluate_ectsum_summaries(result_path: str, n_bootstrap: int, seed: int):
             "rougeL": {
                 "mean": float(np.mean(rougeL_sample_means)),
                 "std": float(np.std(rougeL_sample_means)),
-            },
-            "bleu": {
-                "mean": float(np.mean(bleu_sample_means)),
-                "std": float(np.std(bleu_sample_means)),
-            },
-            "bertscore_precision": {
-                "mean": float(np.mean(bert_p_sample_means)),
-                "std": float(np.std(bert_p_sample_means)),
-            },
-            "bertscore_recall": {
-                "mean": float(np.mean(bert_r_sample_means)),
-                "std": float(np.std(bert_r_sample_means)),
             },
             "bertscore_f1": {
                 "mean": float(np.mean(bert_f1_sample_means)),
@@ -435,9 +370,6 @@ def _format_results(test_metrics: dict, args, use_cross_seed_std: bool) -> dict:
             results["ROUGE-1"] = f"{cross['rouge1']['mean']:.4f} ({cross['rouge1']['std']:.4f})"
             results["ROUGE-2"] = f"{cross['rouge2']['mean']:.4f} ({cross['rouge2']['std']:.4f})"
             results["ROUGE-L"] = f"{cross['rougeL']['mean']:.4f} ({cross['rougeL']['std']:.4f})"
-            results["BLEU"] = f"{cross['bleu']['mean']:.4f} ({cross['bleu']['std']:.4f})"
-            results["BERTScore_P"] = f"{cross['bertscore_precision']['mean']:.4f} ({cross['bertscore_precision']['std']:.4f})"
-            results["BERTScore_R"] = f"{cross['bertscore_recall']['mean']:.4f} ({cross['bertscore_recall']['std']:.4f})"
             results["BERTScore_F1"] = f"{cross['bertscore_f1']['mean']:.4f} ({cross['bertscore_f1']['std']:.4f})"
             results["FCR"] = f"{cross['fcr']['mean']:.3f} ({cross['fcr']['std']:.3f})"
             results["OutTokLen"] = f"{cross['output_token_len']['mean']:.1f} ({cross['output_token_len']['std']:.1f})"
@@ -446,9 +378,6 @@ def _format_results(test_metrics: dict, args, use_cross_seed_std: bool) -> dict:
             results["ROUGE-1"] = f"{boot['rouge1']['mean']:.4f} ({boot['rouge1']['std']:.4f})"
             results["ROUGE-2"] = f"{boot['rouge2']['mean']:.4f} ({boot['rouge2']['std']:.4f})"
             results["ROUGE-L"] = f"{boot['rougeL']['mean']:.4f} ({boot['rougeL']['std']:.4f})"
-            results["BLEU"] = f"{boot['bleu']['mean']:.4f} ({boot['bleu']['std']:.4f})"
-            results["BERTScore_P"] = f"{boot['bertscore_precision']['mean']:.4f} ({boot['bertscore_precision']['std']:.4f})"
-            results["BERTScore_R"] = f"{boot['bertscore_recall']['mean']:.4f} ({boot['bertscore_recall']['std']:.4f})"
             results["BERTScore_F1"] = f"{boot['bertscore_f1']['mean']:.4f} ({boot['bertscore_f1']['std']:.4f})"
             results["FCR"] = f"{boot['fcr']['mean']:.3f} ({boot['fcr']['std']:.3f})" if "fcr" in boot else f"{test_metrics['metadata']['valid_ratio']:.3f}"
             results["OutTokLen"] = f"{boot['output_token_len']['mean']:.1f} ({boot['output_token_len']['std']:.1f})" if "output_token_len" in boot else f"{point['output_token_len']:.1f}"
@@ -456,9 +385,6 @@ def _format_results(test_metrics: dict, args, use_cross_seed_std: bool) -> dict:
         results["ROUGE-1"] = f"{point['rouge1']:.4f}"
         results["ROUGE-2"] = f"{point['rouge2']:.4f}"
         results["ROUGE-L"] = f"{point['rougeL']:.4f}"
-        results["BLEU"] = f"{point['bleu']:.4f}"
-        results["BERTScore_P"] = f"{point['bertscore_precision']:.4f}"
-        results["BERTScore_R"] = f"{point['bertscore_recall']:.4f}"
         results["BERTScore_F1"] = f"{point['bertscore_f1']:.4f}"
         results["FCR"] = f"{test_metrics['metadata']['valid_ratio']:.3f}"
         results["OutTokLen"] = f"{point['output_token_len']:.1f}"

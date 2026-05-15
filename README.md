@@ -15,6 +15,7 @@ This project needs the following prerequisites:
 - PyTorch
 - transformers
 - vLLM
+- Kaggle access for the MedTPE public dataset
 
 ### Installation
 ```bash
@@ -24,20 +25,28 @@ pip install -r requirements.txt
 ```
 
 ### 1. Prepare Public Datasets
-Download and normalize the public datasets used by this release:
+Download the public datasets used by this release from Kaggle:
 ```bash
 python preprocessing/prepare_public_datasets.py --dataset all
 ```
 
+The script downloads `mingchengzhu/medtpe-data` from
+https://www.kaggle.com/datasets/mingchengzhu/medtpe-data/ and copies the
+prepared files into the paths expected by the rest of this repository.
+
 This creates:
-- `data/hf_datasets/fzkuji--cMedQA2/{train,validation,test}.json`
-- `data/hf_datasets/github--ECTSum/{train,val,test}.json`
+- `data/medtpe_data/cmedqa2/{train,validation,test}.json`
+- `data/medtpe_data/ectsum/{train,val,test}.json`
 
 To prepare only one dataset:
 ```bash
 python preprocessing/prepare_public_datasets.py --dataset cmedqa2
 python preprocessing/prepare_public_datasets.py --dataset ectsum
 ```
+
+If Kaggle asks for credentials, place your Kaggle API token at
+`~/.kaggle/kaggle.json` or set `KAGGLE_USERNAME` and `KAGGLE_KEY` before running
+the script.
 
 ### 2. Download Pretrained LLMs
 Log in to Hugging Face if your chosen model requires access, then download a model:
@@ -106,7 +115,7 @@ With a MedTPE + SFT checkpoint ready:
 ```bash
 python demo_inference.py \
   --model_name data/hf_models/Qwen--Qwen2.5-1.5B-Instruct \
-  --sft_model_name data/MedTPE_data/sft_models/Qwen2.5-1.5B-Instruct_task-cmedqa2_maxN-2_maxM-5000
+  --sft_model_name data/sft_models/Qwen2.5-1.5B-Instruct_task-ect_summary_maxN-2_maxM-5000
 ```
 
 ### 6. Evaluate the Effectiveness of MedTPE
@@ -122,7 +131,7 @@ DATASET=ECTSUM bash sh/llm_infer_tpe.sh
 DATASET=ECTSUM bash sh/parse_result_llm_tpe.sh
 ```
 
-Text-generation evaluation uses ROUGE-1/2/L, BLEU, BERTScore, format compliance rate, output token length, and inference time.
+Text-generation evaluation uses ROUGE-1/2/L, BERTScore_F1, format compliance rate, output token length, and inference time.
 
 ## Citation
 ```bibtex

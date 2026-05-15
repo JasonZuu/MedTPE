@@ -8,23 +8,23 @@ DATASET="${DATASET:-CMEDQA2}"
 if [[ "$DATASET" == "CMEDQA2" ]]; then
   TASKS=("cmedqa2")
   TPE_MODEL_PATHS=(
-    "data/MedTPE_data/tpe_models/Qwen2.5-1.5B-Instruct_task-cmedqa2_maxN-2_maxM-5000"
+    "data/tpe_models/Qwen2.5-1.5B-Instruct_task-cmedqa2_maxN-2_maxM-5000"
   )
-  NUM_TRAIN_EPOCHS=1
+  NUM_TRAIN_EPOCHS=10
 elif [[ "$DATASET" == "ECTSUM" ]]; then
   TASKS=("ect_summary")
   TPE_MODEL_PATHS=(
-    "data/MedTPE_data/tpe_models/Qwen2.5-1.5B-Instruct_task-ect_summary_maxN-2_maxM-5000"
+    "data/tpe_models/Qwen2.5-1.5B-Instruct_task-ect_summary_maxN-2_maxM-5000"
   )
-  NUM_TRAIN_EPOCHS=1
+  NUM_TRAIN_EPOCHS=10
 else
   echo "Unsupported public dataset: $DATASET. Use CMEDQA2 or ECTSUM."
   exit 1
 fi
 
 DATA_FORMAT="nl"
-DATA_DIR="data/MedTPE_data/cleaned_SFT_QA"
-LOG_DIR="data/MedTPE_data"
+DATA_DIR="data/cleaned_SFT_QA"
+LOG_DIR="data/"
 MAX_INPUT_LEN="4k"
 MAX_OUTPUT_LEN="2k"
 GPU_IDS="${GPU_IDS:-0}"

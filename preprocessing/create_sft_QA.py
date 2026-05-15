@@ -14,7 +14,7 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_path", type=str, default="data/hf_models/Qwen--Qwen2.5-1.5B-Instruct", help="LLM model path.")
-    parser.add_argument("--data_dir", type=str, default="data/hf_datasets/fzkuji--cMedQA2", help="Data directory.")
+    parser.add_argument("--data_dir", type=str, default="data/medtpe_data/cmedqa2", help="Data directory.")
     parser.add_argument("--output_dir", type=str, default="data/MedTPE_data/SFT_QA", help="Output file path.")
     parser.add_argument("--dataset", type=str, default="CMEDQA2",
                         choices=["ECTSUM", "CMEDQA2"], help="Dataset to use for inference.")
@@ -30,7 +30,7 @@ def get_args():
     parser.add_argument("--gpu_ids",  type=lambda s: [int(item) for item in s.split(',')], default=[0], help="Comma-separated list of GPU IDs to use for inference.")
     parser.add_argument("--gpu_id", type=int, default=None, help="Single GPU id fallback.")
     parser.add_argument("--num_workers", type=int, default=8, help="Number of workers to use for data loading.")
-    parser.add_argument("--gpu_util", type=float, default=0.4, help="Number of workers to use for data loading.")
+    parser.add_argument("--gpu_util", type=float, default=0.93, help="Number of workers to use for data loading.")
     parser.add_argument("--max_input_len", type=str, default="4k", choices=["2k", "4k", "6k", "8k"],
                         help="Max input length.")
     parser.add_argument("--max_output_len", type=str, default="2k", choices=["2k", "4k"],

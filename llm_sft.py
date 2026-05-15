@@ -15,7 +15,7 @@ def _configure_cuda_visible_devices(gpu_ids) -> None:
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--wandb_project", type=str, default="MedTPE", help="WandB project name.")
-    parser.add_argument("--wandb_mode", type=str, default="online", choices=["online", "offline"])
+    parser.add_argument("--wandb_mode", type=str, default="offline", choices=["online", "offline"])
     parser.add_argument("--model_path", type=str, default="data/MedTPE_data/tpe_models/Qwen2.5-1.5B-Instruct_task-cmedqa2_maxN-2_maxM-5000", help="LLM model path.")
     parser.add_argument("--data_dir", type=str, default="data/MedTPE_data/cleaned_SFT_QA", help="Data directory.")
     parser.add_argument("--log_dir", type=str, default="data/MedTPE_data", help="Output file path.")

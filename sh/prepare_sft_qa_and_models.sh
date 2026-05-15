@@ -8,24 +8,24 @@ MODEL_PATHS=(
   "data/hf_models/Qwen--Qwen2.5-1.5B-Instruct"
 )
 
-SFT_QA_DIR="data/MedTPE_data/SFT_QA"
-CLEANED_SFT_QA="data/MedTPE_data/cleaned_SFT_QA"
-TPE_TOKENIZER_DIR="data/MedTPE_data/tpe_tokenizers"
-TPE_MODEL_DIR="data/MedTPE_data/tpe_models"
+SFT_QA_DIR="data/SFT_QA"
+CLEANED_SFT_QA="data/cleaned_SFT_QA"
+TPE_TOKENIZER_DIR="data/tpe_tokenizers"
+TPE_MODEL_DIR="data/tpe_models"
 
 DATASET="${DATASET:-CMEDQA2}"
 if [[ "$DATASET" == "CMEDQA2" ]]; then
   TASKS=("cmedqa2")
-  RAW_DATA_DIR="data/hf_datasets/fzkuji--cMedQA2"
+  RAW_DATA_DIR="data/medtpe_data/cmedqa2"
 elif [[ "$DATASET" == "ECTSUM" ]]; then
   TASKS=("ect_summary")
-  RAW_DATA_DIR="data/hf_datasets/github--ECTSum"
+  RAW_DATA_DIR="data/medtpe_data/ectsum"
 else
   echo "Unsupported public dataset: $DATASET. Use CMEDQA2 or ECTSUM."
   exit 1
 fi
 
-GPU_UTIL="${GPU_UTIL:-0.5}"
+GPU_UTIL="${GPU_UTIL:-0.93}"
 GPU_ID="${GPU_ID:-0}"
 NUM_RESPONSES=1
 DATA_FORMAT="nl"

@@ -5,6 +5,7 @@ datasets
 deepspeed
 huggingface_hub
 joblib
+kagglehub
 multiprocess
 numpy
 polars
@@ -15,5 +16,6 @@ tokenizers
 torch
 tqdm
 transformers
-vllm
+vllm==0.12.0
 wandb
+kagglehub

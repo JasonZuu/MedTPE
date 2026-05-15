@@ -11,16 +11,16 @@ MODEL_PATHS=(
 DATASET="${DATASET:-CMEDQA2}"
 if [[ "$DATASET" == "CMEDQA2" ]]; then
   TASKS=("cmedqa2")
-  DATA_DIR="data/hf_datasets/fzkuji--cMedQA2"
+  DATA_DIR="data/medtpe_data/cmedqa2"
 elif [[ "$DATASET" == "ECTSUM" ]]; then
   TASKS=("ect_summary")
-  DATA_DIR="data/hf_datasets/github--ECTSum"
+  DATA_DIR="data/medtpe_data/ectsum"
 else
   echo "Unsupported public dataset: $DATASET. Use CMEDQA2 or ECTSUM."
   exit 1
 fi
 
-GPU_UTIL="${GPU_UTIL:-0.5}"
+GPU_UTIL="${GPU_UTIL:-0.93}"
 NUM_RESPONSES=1
 DATA_FORMAT="nl"
 TOKENIZER_TYPES=("tpe-sft" "bpe")
@@ -29,8 +29,8 @@ MAX_M=5000
 MAX_INPUT_LEN="8k"
 PE_METHODS=("raw")
 GPU_IDS="${GPU_IDS:-0}"
-TPE_MODEL_DIR="data/MedTPE_data/tpe_models"
-SFT_MODEL_DIR="data/MedTPE_data/sft_models"
+TPE_MODEL_DIR="data/tpe_models"
+SFT_MODEL_DIR="data/sft_models"
 
 for MODEL_PATH in "${MODEL_PATHS[@]}"; do
   for TOKENIZER_TYPE in "${TOKENIZER_TYPES[@]}"; do
